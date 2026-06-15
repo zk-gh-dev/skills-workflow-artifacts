@@ -1,0 +1,39 @@
+name: Build and Deploy
+
+on: 
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - uses: actions/upload-artifacts@v7
+        with:
+          path: dist
+          name: octomatch
+  dev:
+    name: Deploy dev
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          path: website
+          name: octomatch
+      - name: Deploy to dev
+        run: |
+          echo "Downloaded artifact contents:"
+          tree website
+          echo "Demo deploy steps: replace with your real command."
